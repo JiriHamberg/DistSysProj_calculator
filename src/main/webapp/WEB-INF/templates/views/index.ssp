@@ -1,0 +1,41 @@
+<h1> Calculator </h1>
+<div>
+	<table>
+		<tr>
+			<td>
+				<div class="applet-container">
+					<div id="calculator-container" class="applet-output">
+						<ul 
+							id="calculator-result"
+							class="result-container">
+						</ul>
+					</div>
+				
+					<form name="calculator" method="get" class="applet-form">
+						<label> In: </label> <input type="text" name="expression">
+						<input type="submit" value="Calculate"></input>
+					</form>
+				</div>
+			</td>
+			<td>
+				<div class="applet-container">
+					<div id="plotter-container" class="applet-output">
+						<!--<ul id="plotter-result" 
+						class="result-container">
+						</ul>-->
+						<canvas id="plot" width="400" height="400"></canvas>
+					</div>
+					
+					<button id="server-side-plot">Sin(x) Server</button> <br>
+					<button id="client-side-plot">Sin(x) Client</button> <br>
+					<button id="cooperative-plot">Sin(x) Cooperative</button> 
+
+					<!--<form name="plotter" method="get" class="applet-form">
+						<label> In: </label> <input type="text" name="expression">
+						<input type="submit" value="Plot"></input>
+					</form>-->
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>

@@ -1,0 +1,21 @@
+.applet-output {
+	overflow-y: scroll;
+	min-height: 75%;
+	height: 75%;
+}
+
+.applet-container {
+	height: 800px;
+
+}
+
+.applet-form {
+}
+
+.applet-output {
+	/*height: 75%;*/
+}
+
+#plot {
+	/*background-color: black;*/
+}
