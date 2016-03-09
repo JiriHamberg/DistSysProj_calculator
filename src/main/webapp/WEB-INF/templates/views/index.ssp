@@ -1,6 +1,7 @@
 <h1> Calculator </h1>
 <div>
-	<table>
+	<label>Cache Size: </label> <input name="cache" type="number" min="0" max="1000000" step="1" value="10">
+	<table class="application-container">
 		<tr>
 			<td>
 				<div class="applet-container">
@@ -26,8 +27,8 @@
 						<canvas id="plot" width="400" height="400"></canvas>
 					</div>
 					
-					<button id="server-side-plot">Sin(x) Server</button> <br>
-					<button id="client-side-plot">Sin(x) Client</button> <br>
+					<button id="server-side-plot">Sin(x) Server</button> 
+					<button id="client-side-plot">Sin(x) Client</button>
 					<button id="cooperative-plot">Sin(x) Cooperative</button> 
 
 					<!--<form name="plotter" method="get" class="applet-form">

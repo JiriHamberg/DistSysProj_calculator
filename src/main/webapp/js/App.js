@@ -1,36 +1,44 @@
 
-var Calculator = (function() { 
 
-	var form;
+/* Entrypoint of the application. Links Calculator and Plotter
+ * to relevant events.
+ *
+ */
+var App = (function() { 
 
-	var number = new RegExp(/-?[0-9]+(\.[0-9]+)?/);
-	var operator = new RegExp(/[+\-*/]/);
+	//var number = new RegExp(/-?[0-9]+(\.[0-9]+)?/);
+	//var operator = new RegExp(/[+\-*/]/);
 
-	var validExpression = new RegExp("^( *" + number.source  + " *" + operator.source + ")* *" + number.source + " *$");
-	var subExpression =  new RegExp( "(" + operator.source + ")(" + number.source + ")", 'g');
+	//var validExpression = new RegExp("^( *" + number.source  + " *" + operator.source + ")* *" + number.source + " *$");
+	//var subExpression =  new RegExp( "(" + operator.source + ")(" + number.source + ")", 'g');
 
 
 	function init() {
+		Calculator.setCacheSize($(":input[name='cache']")[0].value);
+		$(":input[name='cache']").on('input', function() {
+			Calculator.setCacheSize($(this).val());
+		});
 		$("form[name='calculator']")
 			.removeAttr('onsubmit')
 			.submit(function(event) {
 				event.preventDefault();
-				var atoms = parse($("form[name='calculator'] :input[name='expression']").val());
-				if(atoms) {
-					evaluate(atoms);
+				var input = $("form[name='calculator'] :input[name='expression']").val();
+				var expression = Calculator.parse(input, report_error);
+				if(expression) {
+					Calculator.evaluate(expression, report_result);
 				}
-			});
+		});
 		$("form[name='plotter'")
 			.removeAttr('onsubmit')
 			.submit(function(event) {
 				event.preventDefault();
 				var expression = $("form[name='plotter'] :input[name='expression']").val();
-				serverSidePlot(expression);
-			});
+				Plotter.serverSidePlot(expression);
+		});
 
 		$("#server-side-plot").click(function() {
 			var expression = "sine";
-			serverSidePlot(expression);
+			Plotter.serverSidePlot(expression);
 		});
 
 		$("#client-side-plot").click(function() {
@@ -40,19 +48,19 @@ var Calculator = (function() {
 			for(var x=-Math.PI; x <= Math.PI; x += step) {
 				coordinates.push([x, Math.sin(x)]);
 			}
-			clientSidePlot(coordinates);
+			Plotter.clientSidePlot(coordinates);
 		});	
 
 		$("#cooperative-plot").click(function() {
 			$.ajax({
 				url: 'plotter/coordinates?expression=sine',
 			}).done(function(data) {
-				clientSidePlot(data);
+				Plotter.clientSidePlot(data);
 			});
 		});
 	}
 
-	function parse_all(str) {
+/*	function parse_all(str) {
 		var res = [];
 		while(true) {
 			var matchNum = str.match(number);
@@ -102,10 +110,10 @@ var Calculator = (function() {
 			atoms.unshift(parseFloat(data));
 			evaluate(atoms);
 		});
-	}
+	}*/
 
-	function report_result(op, arg1, arg2, result) {
-		var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
+	function report_result(resultText) {
+		//var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
 		console.log(resultText);
 		$("#calculator-result").append("<li>" + resultText + "</li>");
 		$("#calculator-container").scrollTop(function(){
@@ -123,11 +131,12 @@ var Calculator = (function() {
 		$("form[name='calculator'] :input[name='expression']").val("");
 	}
 
-	function serverSidePlot(expression) {
+	/*function serverSidePlot(expression) {
 		clearPlot();
 		$("#plot").css("background-image", "url(plotter/image?expression=" + encodeURIComponent(expression) + ")" );
 		$("#plot").css("background-size", "100% 100%" );
-	}
+	}*/
+
 
 
 	/*
@@ -135,7 +144,7 @@ var Calculator = (function() {
 	Coordinates is a list of x,y-pairs, eg.
 	[[x1, y1], [x2, y2], ..., [x_n, y_n]]
 	*/
-	function clientSidePlot(coordinates) {
+	/*function clientSidePlot(coordinates) {
 		clearPlot();
 		var canvas = $("#plot")[0];
 		var context = canvas.getContext('2d');
@@ -178,7 +187,7 @@ var Calculator = (function() {
 		$("#plot").css("background-image", '');
 		var canvas = $("#plot")[0];
 		canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-	}
+	}*/
 
 	return {
 		init: init

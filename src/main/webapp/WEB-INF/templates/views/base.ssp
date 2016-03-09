@@ -2,13 +2,15 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<script src="/js/lib/jquery-1.12.0.js"></script>
-		<script src="/js/calculator.js"></script>
-		<link href="/css/calculator.css" rel="stylesheet" type="text/css" />
+		<script src="js/lib/jquery-1.12.0.js"></script>
+		<script src="js/App.js"></script>
+		<script src="js/Calculator.js"></script>
+		<script src="js/Plotter.js"></script>
+		<link href="css/calculator.css" rel="stylesheet" type="text/css" />
 		<title> Calculator </title>
 	</head>
 
-	<body onload="Calculator.init();">
+	<body onload="App.init();">
 		<% render("index.ssp") %>
 	</body>
 </html>

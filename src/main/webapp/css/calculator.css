@@ -4,6 +4,10 @@
 	height: 75%;
 }
 
+table.application-container td {
+	width: 50%;
+}
+
 .applet-container {
 	height: 800px;
 
