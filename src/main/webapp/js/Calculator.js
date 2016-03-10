@@ -1,7 +1,10 @@
 var Calculator = (function() {
 
-	var cacheSize = 0;
+	/*var cacheSize = 0;
 	var cache = [];
+	*/
+
+	var cache = new Cache(0);
 
 	var number = new RegExp(/-?[0-9]+(\.[0-9]+)?/);
 	var operator = new RegExp(/[+\-*/]/);
@@ -85,18 +88,22 @@ var Calculator = (function() {
 		var arg2 = atoms.shift();	
 
 		$.ajax({
-			url: 'calculator',
+			url: App.contextPath + '/calculator',
 			data: {
 				op: op,
 				arg1: arg1,
 				arg2: arg2
 			}
 		}).done(function(data) {
-			var resultText = arg1 + " " + op + " "  + arg2 + " = " + parseFloat(data);
+			var result = parseFloat(data);
+			var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
 			result_callback(resultText);
+
+			var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
+			cache.add(key, result);
 			//result_callback(op, arg1, arg2, parseFloat(data));
 			//report_result(op, arg1, arg2, parseFloat(data));
-			atoms.unshift(parseFloat(data));
+			atoms.unshift(result);
 			evaluate_atoms(atoms, result_callback);
 		});
 	}
@@ -104,19 +111,51 @@ var Calculator = (function() {
 
 	function setCacheSize(newValue) {
 		newValue = parseInt(newValue);
-		if(typeof newValue !== "number") {
+		/*if(typeof newValue !== "number") {
 			throw "Trying to set cache size to a non-numeric value " + newValue;
 		}
 		var diff = cache.length - newValue;
 		if(diff > 0) {
 			cache = cache.slice(diff);
 		}
-		cacheSize = newValue;
+		cacheSize = newValue;*/
 		//console.log(newValue);
+		cache.setSize(newValue);
 	};
 
+	/*function cachePut(arg1, arg2, op, value) {
+		var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
+		cache.add(key, value);
+	}*/
+
 	function simplify(input) {
-		var atoms = parse(input);
+
+		var expression = parse(input);
+
+		if(expression.type !== "long") {
+			return expression.value;
+		}
+
+		var atoms = expression.value;
+
+		while(atoms.length > 1) {
+			var arg1 = atoms.shift();
+			var op = atoms.shift();
+			var arg2 = atoms.shift();
+			var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
+			var cached = cache.get(key);
+
+			if(cached !== undefined) {
+				atoms.unshift(cached);	
+			} else {
+				atoms.unshift(arg2);
+				atoms.unshift(op);
+				atoms.unshift(arg1);
+				break;
+			}
+		}
+
+		return atoms.join(" ");
 	}
 
 	return {

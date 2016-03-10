@@ -15,6 +15,7 @@
 					<form name="calculator" method="get" class="applet-form">
 						<label> In: </label> <input type="text" name="expression">
 						<input type="submit" value="Calculate"></input>
+						<button id="simplify">Simplify</button>
 					</form>
 				</div>
 			</td>

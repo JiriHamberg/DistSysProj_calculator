@@ -9,7 +9,7 @@ class CalculatorServlet extends CalculatorStack {
 
   get("/") {
     contentType = "text/html"
-    ssp("/base", "layout" -> "")
+    ssp("/base", "layout" -> "", "contextPath" -> request.getContextPath())
   }
 
   get("/calculator") {

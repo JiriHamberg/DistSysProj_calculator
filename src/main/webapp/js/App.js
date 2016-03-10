@@ -12,6 +12,8 @@ var App = (function() {
 	//var validExpression = new RegExp("^( *" + number.source  + " *" + operator.source + ")* *" + number.source + " *$");
 	//var subExpression =  new RegExp( "(" + operator.source + ")(" + number.source + ")", 'g');
 
+	var contextPath = $("head").data("context-path") || "";
+
 
 	function init() {
 		Calculator.setCacheSize($(":input[name='cache']")[0].value);
@@ -27,14 +29,20 @@ var App = (function() {
 				if(expression) {
 					Calculator.evaluate(expression, report_result);
 				}
+			});
+		$("button#simplify").click(function(event) {
+			event.preventDefault();
+			var input = $("form[name='calculator'] :input[name='expression']");
+			input.val(Calculator.simplify(input.val()));
 		});
-		$("form[name='plotter'")
+
+		$("form[name='plotter']")
 			.removeAttr('onsubmit')
 			.submit(function(event) {
 				event.preventDefault();
 				var expression = $("form[name='plotter'] :input[name='expression']").val();
 				Plotter.serverSidePlot(expression);
-		});
+			});
 
 		$("#server-side-plot").click(function() {
 			var expression = "sine";
@@ -53,7 +61,7 @@ var App = (function() {
 
 		$("#cooperative-plot").click(function() {
 			$.ajax({
-				url: 'plotter/coordinates?expression=sine',
+				url: contextPath + '/plotter/coordinates?expression=sine',
 			}).done(function(data) {
 				Plotter.clientSidePlot(data);
 			});
@@ -190,6 +198,7 @@ var App = (function() {
 	}*/
 
 	return {
+		contextPath: contextPath,
 		init: init
 	};
 })();

@@ -3,7 +3,7 @@ var Plotter = (function() {
 
 	function serverSidePlot(expression) {
 		clearPlot();
-		$("#plot").css("background-image", "url(plotter/image?expression=" + encodeURIComponent(expression) + ")" );
+		$("#plot").css("background-image", "url(" + App.contextPath + "/plotter/image?expression=" + encodeURIComponent(expression) + ")" );
 		$("#plot").css("background-size", "100% 100%" );
 	}
 

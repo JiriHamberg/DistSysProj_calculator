@@ -1,12 +1,15 @@
 
+<%@ val contextPath: String %>
+
 <!DOCTYPE html>
 <html>
-	<head>
-		<script src="js/lib/jquery-1.12.0.js"></script>
-		<script src="js/App.js"></script>
-		<script src="js/Calculator.js"></script>
-		<script src="js/Plotter.js"></script>
-		<link href="css/calculator.css" rel="stylesheet" type="text/css" />
+	<head data-context-path="${contextPath}">
+		<script src="${contextPath}/js/lib/jquery-1.12.0.js"></script>
+		<script src="${contextPath}/js/Cache.js"></script>
+		<script src="${contextPath}/js/App.js"></script>
+		<script src="${contextPath}/js/Calculator.js"></script>
+		<script src="${contextPath}/js/Plotter.js"></script>
+		<link href="${contextPath}/css/calculator.css" rel="stylesheet" type="text/css" />
 		<title> Calculator </title>
 	</head>
 
