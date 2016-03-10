@@ -1,10 +1,33 @@
 var Plotter = (function() {
 
 
+	function plot(expression) {
+		var plotType = $("input[type='radio'][name='plot-type']:checked").val();
+		switch(plotType) {
+			case "server":
+				serverSidePlot(expression);
+				break;
+			case "client":
+				var coordinates = [];
+				var step = 0.01;
+				for(var x=-Math.PI; x <= Math.PI; x += step) {
+					coordinates.push([x, Math.sin(x)]);
+				}
+				clientSidePlot(coordinates);
+				break;
+			case "cooperative":
+				Calculator.approximateSine();
+				break;
+			default:
+				throw "Invalid plot type: " + plotType;
+		}
+	}
+
 	function serverSidePlot(expression) {
 		clearPlot();
-		$("#plot").css("background-image", "url(" + App.contextPath + "/plotter/image?expression=" + encodeURIComponent(expression) + ")" );
+		$("#plot").css("background-image", "url('" + App.contextPath + "/plotter/image?expression=" + encodeURIComponent(expression) + "')" );
 		$("#plot").css("background-size", "100% 100%" );
+		App.clearInput();
 	}
 
 	/*
@@ -28,8 +51,9 @@ var Plotter = (function() {
 		};
 
 		for(var i = 0; i < coordinates.length; i++) {
+			//console.log(coordinates[i]);
 			context.fillStyle = "red";
-			context.fillRect(scaleX(coordinates[i][0]), scaleY(coordinates[i][1]), 1, 1);
+			context.fillRect(scaleX(coordinates[i][0]), scaleY(coordinates[i][1]), 2, 2);
 		}
 		
 		context.fillStyle = "black";
@@ -49,6 +73,8 @@ var Plotter = (function() {
 		
 		context.font = "175% Arial";
 		context.fillText("sin(x)", 100, 100);
+
+		App.clearInput();
 	}
 
 	function clearPlot() {
@@ -58,6 +84,7 @@ var Plotter = (function() {
 	}
 
 	return {
+		plot: plot,
 		serverSidePlot: serverSidePlot,
 		clearCanvas: clearPlot,
 		clientSidePlot: clientSidePlot

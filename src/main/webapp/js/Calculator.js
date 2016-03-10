@@ -1,9 +1,5 @@
 var Calculator = (function() {
 
-	/*var cacheSize = 0;
-	var cache = [];
-	*/
-
 	var cache = new Cache(0);
 
 	var number = new RegExp(/-?[0-9]+(\.[0-9]+)?/);
@@ -58,24 +54,46 @@ var Calculator = (function() {
 				value: parse_atoms(expression)
 			};
 		}
-		//expression = expression.replace(/ /g, "");
-		//return parse_atoms(expression);
 	}
 
 	function evaluate(expression, result_callback) {
 		switch(expression.type) {
 			case "plot":
-				//Plotter.plot(expression.value);
-				console.log("PLOT");
+				Plotter.plot(expression.value);
 				break;
 			case "simple":
-				result_callback(expression.value + " = " + expression.value);
+				result_callback(expression.value);
 				break;
 			case "long":
 				evaluate_atoms(expression.value, result_callback);
 				break;
 			default:
 				throw "Invalid expression type: " + expression.type;
+		}
+	}
+
+
+	function calculate_serverside(arg1, arg2, op, callback) {
+
+		var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
+		var cached = cache.get(key);
+
+		if(cached !== undefined) {
+			callback(cached);
+		} else {
+			$.ajax({
+				url: App.contextPath + '/calculator',
+				data: {
+					op: op,
+					arg1: arg1,
+					arg2: arg2
+				}
+			}).done(function(data) {
+				var result = parseFloat(data);
+				var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
+				cache.add(key, result);
+				callback(result);
+			});
 		}
 	}
 
@@ -87,7 +105,7 @@ var Calculator = (function() {
 		var op = atoms.shift();
 		var arg2 = atoms.shift();	
 
-		$.ajax({
+		/*$.ajax({
 			url: App.contextPath + '/calculator',
 			data: {
 				op: op,
@@ -101,32 +119,120 @@ var Calculator = (function() {
 
 			var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
 			cache.add(key, result);
-			//result_callback(op, arg1, arg2, parseFloat(data));
-			//report_result(op, arg1, arg2, parseFloat(data));
+
 			atoms.unshift(result);
 			evaluate_atoms(atoms, result_callback);
+		});*/
+		calculate_serverside(arg1, arg2, op, function(result) {
+			var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
+			result_callback(resultText);
+			atoms.unshift(result);
+			evaluate_atoms(atoms, result_callback);
+		});
+
+	}
+
+	function approximateSine() {
+		var pending = 0;
+		var step = 0.1;
+		var i = 0;
+		var coordinates = [];
+
+		for(var x=-Math.PI; x <= Math.PI; x += step) {
+			pending += 1;
+		}
+
+		for(var x=-Math.PI; x <= Math.PI; x += step) {	
+			calculateSineCoordinate(x, i, function(result, x, i) {
+				coordinates[i] = [x, result];
+				pending -= 1;
+				if(pending === 0) {
+					//console.log(coordinates);
+					Plotter.clientSidePlot(coordinates);
+				}
+			});
+			i++;
+		}
+
+	}
+
+	/** Taylor series approximation to calculate sine.
+	 *	 sin(x) ~ x - 1/3! x^3 + 1/5! x^5 - 1/7! x^7
+	 *
+	 *  Welcome to the callback hell.
+	 */
+	function calculateSineCoordinate(x, i, callback) {
+		var coeffs = [1, 3, 5, 7];
+		power_sum(0, x, coeffs, function(result) {
+			callback(result, x, i);
+		});
+	}
+
+	function power(state, x, order, callback) {
+		var arg1 = state;
+		var arg2 = x;
+		var op = "*";
+
+		calculate_serverside(arg1, arg2, op, function(result) {
+			if(order <= 1) {
+				callback(result);
+			} else {
+				power(result, x, order - 1, callback);
+			}
+		});
+	}
+
+	function factorial(state, n, callback) {
+		var arg1 = state;
+		var arg2 = n;
+		var op = "*";
+
+		calculate_serverside(arg1, arg2, op, function(result) {
+			if(n <= 1) {
+				callback(result);
+			} else {
+				factorial(result, n - 1, callback);
+			}
+		});
+	}
+
+	function taylor_term(x, order, callback) {
+		power(1, x, order, function(pow) {
+			factorial(1, order, function(fact) {
+				calculate_serverside(1, fact, "/", function(div) {
+					calculate_serverside(pow, div, "*", function(result) {
+						//terms of order 3, 7, 11, 15, ... are negative
+						if(order % 4 === 3) {
+							callback(-result);
+						} else {
+							callback(result);
+						}
+						});
+				});
+			});
+		});
+	}
+
+	function power_sum(state, x, coeffs, callback) {
+		var order = coeffs.shift();
+
+		taylor_term(x, order, function(term) {
+			calculate_serverside(state, term, "+", function(result) {
+				if(coeffs.length === 0) {
+					callback(result);
+				} else {
+					power_sum(result, x, coeffs, callback);
+				}
+			});
 		});
 	}
 
 
+
 	function setCacheSize(newValue) {
 		newValue = parseInt(newValue);
-		/*if(typeof newValue !== "number") {
-			throw "Trying to set cache size to a non-numeric value " + newValue;
-		}
-		var diff = cache.length - newValue;
-		if(diff > 0) {
-			cache = cache.slice(diff);
-		}
-		cacheSize = newValue;*/
-		//console.log(newValue);
 		cache.setSize(newValue);
 	};
-
-	/*function cachePut(arg1, arg2, op, value) {
-		var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
-		cache.add(key, value);
-	}*/
 
 	function simplify(input) {
 
@@ -159,6 +265,7 @@ var Calculator = (function() {
 	}
 
 	return {
+		approximateSine: approximateSine,
 		parse: parse,
 		evaluate: evaluate,
 		setCacheSize: setCacheSize,

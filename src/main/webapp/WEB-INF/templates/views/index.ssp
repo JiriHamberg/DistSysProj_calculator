@@ -15,7 +15,11 @@
 					<form name="calculator" method="get" class="applet-form">
 						<label> In: </label> <input type="text" name="expression">
 						<input type="submit" value="Calculate"></input>
-						<button id="simplify">Simplify</button>
+						<button id="simplify">Simplify</button> <br>
+						<label> Plot type </label> <br>
+						<input type="radio" name="plot-type" value="server" checked> Server <br>
+						<input type="radio" name="plot-type" value="client"> Client <br>
+						<input type="radio" name="plot-type" value="cooperative"> Cooperative <br>
 					</form>
 				</div>
 			</td>

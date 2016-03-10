@@ -1,11 +1,12 @@
 package DistSysProject.assignment3.app
 
 import org.scalatra._
+import org.json4s.{DefaultFormats, Formats}
+import org.scalatra.json._
+
 import scala.util.Try
 import DistSysProject.assignment3.services._
 
-import org.json4s.{DefaultFormats, Formats}
-import org.scalatra.json._
 
 class PlotterServlet extends CalculatorStack with JacksonJsonSupport {
 
@@ -16,8 +17,12 @@ class PlotterServlet extends CalculatorStack with JacksonJsonSupport {
 
     expression.map { expr =>
     	contentType = "image/png"
-    	val stream = new java.io.ByteArrayInputStream(Plotter.getImage(expr))
-      org.scalatra.util.io.copy(stream, response.getOutputStream)
+      Plotter.getImage(expr).map { byteArray =>
+        val stream = new java.io.ByteArrayInputStream(byteArray)
+        org.scalatra.util.io.copy(stream, response.getOutputStream)
+      }.getOrElse {
+        BadRequest(reason = "Invalid parameters")
+      }
     } getOrElse {
     	BadRequest(reason = "Invalid parameters")
     }

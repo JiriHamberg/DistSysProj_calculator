@@ -7,14 +7,16 @@ import scala.math._
 
 object Plotter {
 
-	def getImage(expression: String): Array[Byte] = {
+	def getImage(expression: String): Option[Array[Byte]] = {
+		//println(expression)
 		expression match {
-			case "sine" => gnuplot("sin(x)")			
+			case "sin(x)" => Some(gnuplot(expression))
+			case _ => None
 		}
 	}
 
 	def getCoordinates(expression: String): List[List[Double]] = {
-		expression match { case "sine" =>
+		expression match { case "sin(x)" =>
 			val range = (-Math.PI to Math.PI by 0.01).toList  
 			(range zip ( range map SineTaylor.compute )) map { case (x, y) =>
 				List(x, y) //Map("x" -> x, "y" -> y)
