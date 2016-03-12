@@ -24,7 +24,10 @@ Cache.prototype.add = function(key, value) {
 };
 
 Cache.prototype.get = function(key) {
-	return this._values[key];
+	var value = this._values[key];
+	this.add(key, value);
+	return value;
+	//return this._values[key];
 };
 
 

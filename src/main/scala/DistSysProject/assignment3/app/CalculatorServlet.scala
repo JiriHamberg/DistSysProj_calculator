@@ -30,7 +30,6 @@ class CalculatorServlet extends CalculatorStack {
 	} else {
 		BadRequest(reason="Bad parameters")
 	} 	
-
   }
 
 

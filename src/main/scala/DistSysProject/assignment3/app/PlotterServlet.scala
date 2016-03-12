@@ -28,18 +28,4 @@ class PlotterServlet extends CalculatorStack with JacksonJsonSupport {
     }
   }
 
-  get("/coordinates") {
-    //implicit val jsonFormats: Formats = DefaultFormats
-    var expression = Try(params("expression")).toOption
-
-    expression.map { expr =>
-      contentType = formats("json")
-      Plotter.getCoordinates(expr)
-    } getOrElse {
-      BadRequest(reason = "Invalid parameters")
-    }
-
-  }
-
-
 }

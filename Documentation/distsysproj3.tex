@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+
+\usepackage[document]{ragged2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{textcomp}
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+	backgroundcolor=\color{lbcolor},
+	tabsize=4,
+	rulecolor=,
+	language=matlab,
+        basicstyle=\scriptsize,
+        upquote=true,
+        aboveskip={1.5\baselineskip},
+        columns=fixed,
+        showstringspaces=false,
+        extendedchars=true,
+        breaklines=true,
+        prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+        frame=single,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,1},
+        commentstyle=\color[rgb]{0.133,0.545,0.133},
+        stringstyle=\color[rgb]{0.627,0.126,0.941},
+}
+
+\lstdefinelanguage{scala}{
+  morekeywords={abstract,case,catch,class,def,%
+    do,else,extends,false,final,finally,%
+    for,if,implicit,import,match,mixin,%
+    new,null,object,override,package,%
+    private,protected,requires,return,sealed,%
+    super,this,throw,trait,true,try,%
+    type,val,var,while,with,yield},
+  otherkeywords={=>,<-,<\%,<:,>:,\#,@},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[n]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]',
+  morestring=[b]"""
+}
+
+
+\author{Jiri Hamberg 013881339}
+\title{Distributed Systems Project, Assignment 3}
+
+
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\begin{document}
+
+\maketitle
+
+
+\section{ Assignment }
+
+In this assignment we were asked complete three tasks (from the assignment sheet):
+
+\begin{enumerate}
+
+	\item Write	 a	 web-based	 calculator	 which	 uses	 a	 simple	 input	 form	 and	
+performs	all	the	calculation	on	the	server	side.
+	\item Migrate	some	of	the	functionality	of	the	calculator	to	the	client	side	using	
+Javascript.
+	\item Implement	caching	of	results	on	the	client	side. 
+\end{enumerate}
+
+\section{ Implementation }
+
+\subsection*{Task 1}
+
+I chose to use Scalatra web framework for implementing the server since I have some prior experience working with Scala and the framework. The server side functionality of this step is very simple. The following section of code, from CalculatorServlet.scala, registers a handler for HTTP GET requests coming to URL "/calculator". 
+
+\begin{lstlisting}[language=scala]
+  get("/calculator") {
+  	val (arg1, arg2, op) = (
+  		Try(params("arg1").toDouble).toOption,
+  		Try(params("arg2").toDouble).toOption,
+  		Try(params("op")).toOption
+	)
+
+	if(Seq(arg1, arg2, op).forall(p => p.isDefined)) {
+		val result: Option[Double] = Calculator.calculate(op.get, arg1.get, arg2.get)
+		if (result.isDefined) {
+			contentType = "text/plain"
+			result.get.toString
+		} else {
+			BadRequest(reason="Arithmetic error or invalid operator")
+		}
+	} else {
+		BadRequest(reason="Bad parameters")
+	} 	
+  }    
+\end{lstlisting}
+
+If the request has required parameters, then a Calculator service will do the calculation and the result is then sent as the body of the HTTP response. 
+
+
+\end{document}
