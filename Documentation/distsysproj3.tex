@@ -75,6 +75,8 @@ Javascript.
 	\item Implement	caching	of	results	on	the	client	side. 
 \end{enumerate}
 
+The application is hosted on a Raspberry pi computer running an Apache Tomcat web server. The application can be reached at 88.115.18.57/calculator. The project also has \href{https://github.com/JiriHamberg/DistSysProj_calculator}{a Github page}. To build the project using SBT (Scala Build Tool), simply run \textit{sbt package} on the root of the project folder. This will create a .war package that is ready to be deployed.
+
 \section{ Implementation }
 
 \subsection*{Task 1}
@@ -105,5 +107,26 @@ I chose to use Scalatra web framework for implementing the server since I have s
 
 If the request has required parameters, then a Calculator service will do the calculation and the result is then sent as the body of the HTTP response. 
 
+The client side of this task is implemented in the Calculator.js file. When the user gives a calculation to the input and hits the "Calculate"-button, the input string will be parsed to a list of operands and operators. The list is then evaluated by repeatedly taking the first three elements of the list and sending them to the server to be calculated and putting the result to the beginning of the list.
+
+
+\subsection*{Task 2}
+
+The variant of the plotting can be selected with the radio buttons "Server", "Client" and "Cooperative" on the web application. The sine plotting is initiated when the user inputs "sin(x)" and hits the "Calculate"-button.
+
+The server side variant is implemented using gnuplot. The cooperative variant uses a Taylor series expansion of the sine function for approximation. A Taylor polynomial of degree 7 is calculated, sending each individual operation to the server. The operations are chained in the javascript code using callbacks. All calculations of a point of the plot happen in serial fashion, one request at a time. However, the calculation of each point is started at once for faster plotting. The plot is only realized after all points have been calculated.
+
+  
+\subsection*{Task 3}
+
+I implemented the client side caching functionality with a javascript module "Cache", in file Cache.js, using the class pattern. The cache is basically an ordered hash table with fixed length. Each read/write operation on a key will reposition the key so that the key will be removed last from the cache. The operations are serialized to JSON-strings when put to the cache. 
+
+Whenever the client is about to make a computation request to the back end, the cache is first checked for a match and if match is found, the result is immediately returned and no request is sent.
+
+This image represents the number of requests sent to the back end when using the third variant of the sine plotting from task 2.
+
+\includegraphics[width=0.9\textwidth]{cache.png}
+
+Please do note, that the number of cache hits in my implementation is not deterministic in nature. This is because all the data points are being calculated concurrently and the order in which the responses arrive from the back end is not deterministic. The trend is quite clear though: increasing cache size will result in fewer requests being sent, which is no surprise. 
 
 \end{document}

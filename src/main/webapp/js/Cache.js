@@ -27,7 +27,6 @@ Cache.prototype.get = function(key) {
 	var value = this._values[key];
 	this.add(key, value);
 	return value;
-	//return this._values[key];
 };
 
 
@@ -40,7 +39,7 @@ Cache.prototype.setSize = function(newSize) {
 		var temp = this._keys.splice(diff);
 		var toRemove = this._keys;
 		this._keys = temp;
-		//var toRemove = this._keys.splice(diff);
+
 		for(var i = 0; i < toRemove.length; i++) {
 			delete this._values[toRemove[i]];
 		}

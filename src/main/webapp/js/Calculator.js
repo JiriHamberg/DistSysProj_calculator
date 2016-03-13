@@ -12,7 +12,7 @@ var Calculator = (function() {
 	var validExpression = new RegExp(longExpression.source + "|" + sineExpression.source + "|" + simpleExpression.source);
 	var subExpression =  new RegExp( "(" + operator.source + ")(" + number.source + ")", 'g');
 
-	function parse_atoms(str) {
+	function parseAtoms(str) {
 		var res = [];
 		while(true) {
 			var matchNum = str.match(number);
@@ -32,9 +32,9 @@ var Calculator = (function() {
 		return res;
 	}
 
-	function parse(expression, error_callback) {
+	function parse(expression, errorCallback) {
 		if(!validExpression.test(expression)) {
-			error_callback(expression, "Invalid expression");
+			errorCallback(expression, "Invalid expression");
 			return;
 		}
 		expression = expression.replace(/ /g, "");
@@ -51,21 +51,21 @@ var Calculator = (function() {
 		} else {
 			return {
 				type: "long",
-				value: parse_atoms(expression)
+				value: parseAtoms(expression)
 			};
 		}
 	}
 
-	function evaluate(expression, result_callback) {
+	function evaluate(expression, resultCallback) {
 		switch(expression.type) {
 			case "plot":
 				Plotter.plot(expression.value);
 				break;
 			case "simple":
-				result_callback(expression.value);
+				resultCallback(expression.value);
 				break;
 			case "long":
-				evaluate_atoms(expression.value, result_callback);
+				evaluateAtoms(expression.value, resultCallback);
 				break;
 			default:
 				throw "Invalid expression type: " + expression.type;
@@ -73,7 +73,7 @@ var Calculator = (function() {
 	}
 
 
-	function calculate_serverside(arg1, arg2, op, callback) {
+	function calculateServerside(arg1, arg2, op, callback) {
 
 		var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
 		var cached = cache.get(key);
@@ -97,7 +97,7 @@ var Calculator = (function() {
 		}
 	}
 
-	function evaluate_atoms(atoms, result_callback) {
+	function evaluateAtoms(atoms, resultCallback) {
 		if(atoms.length <= 1) {
 			return;
 		}
@@ -105,29 +105,11 @@ var Calculator = (function() {
 		var op = atoms.shift();
 		var arg2 = atoms.shift();	
 
-		/*$.ajax({
-			url: App.contextPath + '/calculator',
-			data: {
-				op: op,
-				arg1: arg1,
-				arg2: arg2
-			}
-		}).done(function(data) {
-			var result = parseFloat(data);
+		calculateServerside(arg1, arg2, op, function(result) {
 			var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
-			result_callback(resultText);
-
-			var key = JSON.stringify({arg1: arg1, arg2: arg2, op: op});
-			cache.add(key, result);
-
+			resultCallback(resultText);
 			atoms.unshift(result);
-			evaluate_atoms(atoms, result_callback);
-		});*/
-		calculate_serverside(arg1, arg2, op, function(result) {
-			var resultText = arg1 + " " + op + " "  + arg2 + " = " + result;
-			result_callback(resultText);
-			atoms.unshift(result);
-			evaluate_atoms(atoms, result_callback);
+			evaluateAtoms(atoms, resultCallback);
 		});
 
 	}
@@ -163,7 +145,7 @@ var Calculator = (function() {
 	 */
 	function calculateSineCoordinate(x, i, callback) {
 		var coeffs = [1, 3, 5, 7];
-		power_sum(0, x, coeffs, function(result) {
+		powerSum(0, x, coeffs, function(result) {
 			callback(result, x, i);
 		});
 	}
@@ -173,7 +155,7 @@ var Calculator = (function() {
 		var arg2 = x;
 		var op = "*";
 
-		calculate_serverside(arg1, arg2, op, function(result) {
+		calculateServerside(arg1, arg2, op, function(result) {
 			if(order <= 1) {
 				callback(result);
 			} else {
@@ -187,7 +169,7 @@ var Calculator = (function() {
 		var arg2 = n;
 		var op = "*";
 
-		calculate_serverside(arg1, arg2, op, function(result) {
+		calculateServerside(arg1, arg2, op, function(result) {
 			if(n <= 1) {
 				callback(result);
 			} else {
@@ -196,11 +178,11 @@ var Calculator = (function() {
 		});
 	}
 
-	function taylor_term(x, order, callback) {
+	function taylorTerm(x, order, callback) {
 		power(1, x, order, function(pow) {
 			factorial(1, order, function(fact) {
-				calculate_serverside(1, fact, "/", function(div) {
-					calculate_serverside(pow, div, "*", function(result) {
+				calculateServerside(1, fact, "/", function(div) {
+					calculateServerside(pow, div, "*", function(result) {
 						//terms of order 3, 7, 11, 15, ... are negative
 						if(order % 4 === 3) {
 							callback(-result);
@@ -213,15 +195,15 @@ var Calculator = (function() {
 		});
 	}
 
-	function power_sum(state, x, coeffs, callback) {
+	function powerSum(state, x, coeffs, callback) {
 		var order = coeffs.shift();
 
-		taylor_term(x, order, function(term) {
-			calculate_serverside(state, term, "+", function(result) {
+		taylorTerm(x, order, function(term) {
+			calculateServerside(state, term, "+", function(result) {
 				if(coeffs.length === 0) {
 					callback(result);
 				} else {
-					power_sum(result, x, coeffs, callback);
+					powerSum(result, x, coeffs, callback);
 				}
 			});
 		});

@@ -8,6 +8,7 @@ var Plotter = (function() {
 				serverSidePlot(expression);
 				break;
 			case "client":
+				App.clearInput();
 				var coordinates = [];
 				var step = 0.01;
 				for(var x=-Math.PI; x <= Math.PI; x += step) {
@@ -16,6 +17,7 @@ var Plotter = (function() {
 				clientSidePlot(coordinates);
 				break;
 			case "cooperative":
+				App.clearInput();
 				Calculator.approximateSine();
 				break;
 			default:
@@ -73,8 +75,6 @@ var Plotter = (function() {
 		
 		context.font = "175% Arial";
 		context.fillText("sin(x)", 100, 100);
-
-		App.clearInput();
 	}
 
 	function clearPlot() {
